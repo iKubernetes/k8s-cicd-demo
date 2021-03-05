@@ -1,0 +1,136 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: gitlab
+  namespace: gitlab
+  labels:
+    app: gitlab
+spec:
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: http
+      nodePort: 31080
+    - name: ssh
+      protocol: TCP
+      port: 22
+      nodePort: 31022
+      targetPort: ssh
+  selector:
+    app: gitlab
+  type: NodePort
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: gitlab
+  namespace: gitlab
+  labels:
+    app: gitlab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gitlab
+  template:
+    metadata:
+      name: gitlab
+      labels:
+        app: gitlab
+    spec:
+      containers:
+      - name: gitlab
+        image: 'sameersbn/gitlab:13.8.4'
+        ports:
+        - name: ssh
+          containerPort: 22
+        - name: http
+          containerPort: 80
+        - name: https
+          containerPort: 443
+        env:
+        - name: TZ
+          value: Asia/Shanghai
+        - name: GITLAB_TIMEZONE
+          value: Beijing
+        - name: GITLAB_SECRETS_DB_KEY_BASE
+          value: ibmeFmTkL0W9q80Ar31N8vbnr1w
+        - name: GITLAB_SECRETS_SECRET_KEY_BASE
+          value: BqDERXFUcPg4ER3CDQEEkAJbJHw
+        - name: GITLAB_SECRETS_OTP_KEY_BASE
+          value: LUH83tY5y4Qf3KWY7ILssWRtKkY
+        - name: GITLAB_ROOT_PASSWORD
+          value: magedu.com
+        - name: GITLAB_ROOT_EMAIL 
+          value: mage@magedu.com
+        - name: GITLAB_HOST           
+          value: 'localhost'
+        - name: GITLAB_PORT        
+          value: '31080' 
+        - name: GITLAB_PORT        
+          value: '80'                   
+        - name: GITLAB_SSH_PORT   
+          value: '22'
+        - name: GITLAB_SSH_PORT   
+          value: '31022'
+        - name: GITLAB_NOTIFY_ON_BROKEN_BUILDS
+          value: 'true'
+        - name: GITLAB_NOTIFY_PUSHER
+          value: 'false'
+        - name: DB_TYPE             
+          value: postgres
+        - name: DB_HOST         
+          value: gitlab-postgresql           
+        - name: DB_PORT          
+          value: '5432'
+        - name: DB_USER        
+          value: gitlab
+        - name: DB_PASS         
+          value: magedu.com
+        - name: DB_NAME          
+          value: gitlabhq_production
+        - name: REDIS_HOST
+          value: gitlab-redis              
+        - name: REDIS_PORT      
+          value: '6379'
+        resources: 
+          requests:
+            cpu: 1
+            memory: 1Gi
+          limits:
+            cpu: 2
+            memory: 8Gi
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+            scheme: HTTP
+          initialDelaySeconds: 300
+          timeoutSeconds: 5
+          periodSeconds: 10
+          successThreshold: 1
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+            scheme: HTTP
+          initialDelaySeconds: 5
+          timeoutSeconds: 30
+          periodSeconds: 10
+          successThreshold: 1
+          failureThreshold: 3
+        volumeMounts:
+        - name: data
+          mountPath: /home/git/data
+        - name: localtime
+          mountPath: /etc/localtime
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: cce-evs-gitlab
+      - name: localtime
+        hostPath:
+          path: /etc/localtime
