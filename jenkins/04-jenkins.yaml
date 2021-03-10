@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: jenkins
-  namespace: cicd 
+  namespace: jenkins 
 spec:
   replicas: 1
   selector:
@@ -16,6 +16,14 @@ spec:
     spec:
       terminationGracePeriodSeconds: 10
       serviceAccount: jenkins-admin
+      initContainers:
+      - name: volume-mount-hack
+        image: busybox
+        command: ["sh", "-c", "chown -R 1000:1000 /data/"]
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+        - name: jenkinshome
+          mountPath: /data
       containers:
       - name: jenkins
         image: jenkins/jenkins:lts-alpine
@@ -58,5 +66,6 @@ spec:
         fsGroup: 1000
       volumes:
       - name: jenkinshome
-        persistentVolumeClaim:
-          claimName: cce-evs-jenkins
+        hostPath:
+          path: /data/jenkins/
+          type: DirectoryOrCreate

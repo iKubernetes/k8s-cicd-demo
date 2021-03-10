@@ -3,7 +3,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: jenkins
-  namespace: cicd 
+  namespace: jenkins 
   labels:
     app: jenkins
 spec:
@@ -17,5 +17,3 @@ spec:
     nodePort: 32080
   - name: agent
     port: 50000
-    targetPort: agent
-    nodePort: 32081

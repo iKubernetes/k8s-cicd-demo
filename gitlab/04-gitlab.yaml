@@ -129,8 +129,9 @@ spec:
           mountPath: /etc/localtime
       volumes:
       - name: data
-        persistentVolumeClaim:
-          claimName: cce-evs-gitlab
+        hostPath:
+          path: /data/gitlab/gitlab/
+          type: DirectoryOrCreate
       - name: localtime
         hostPath:
           path: /etc/localtime

@@ -3,6 +3,7 @@ kind: Service
 apiVersion: v1
 metadata:
   name: gitlab-postgresql
+  namespace: gitlab
   labels:
     app: gitlab-postgresql
 spec:
@@ -19,7 +20,8 @@ spec:
 kind: Deployment
 apiVersion: apps/v1
 metadata:
-  name: postgresql
+  name: gitlab-pgsql
+  namespace: gitlab
   labels:
     app: postgresql
 spec:
@@ -76,5 +78,6 @@ spec:
           mountPath: /var/lib/postgresql
       volumes:
       - name: data
-        persistentVolumeClaim:
-          claimName: cce-evs-pgsql
+        hostPath:
+          path: /data/gitlab/postgresql
+          type: DirectoryOrCreate

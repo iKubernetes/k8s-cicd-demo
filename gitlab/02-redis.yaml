@@ -3,6 +3,7 @@ kind: Service
 apiVersion: v1
 metadata:
   name: gitlab-redis
+  namespace: gitlab
   labels:
     app: gitlab-redis
 spec:
@@ -19,6 +20,7 @@ kind: Deployment
 apiVersion: apps/v1
 metadata:
   name: gitlab-redis
+  namespace: gitlab
   labels:
     app: gitlab-redis
 spec:
@@ -71,5 +73,6 @@ spec:
             mountPath: /var/lib/redis
       volumes:
       - name: data
-        persistentVolumeClaim:
-          claimName: cce-evs-redis   
+        hostPath:
+          path: /data/gitlab/redis/
+          type: DirectoryOrCreate
