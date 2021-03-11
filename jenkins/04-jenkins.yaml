@@ -26,7 +26,7 @@ spec:
           mountPath: /data
       containers:
       - name: jenkins
-        image: jenkins/jenkins:lts-alpine
+        image: jenkins/jenkins:alpine
         imagePullPolicy: IfNotPresent
         env:
         - name: JAVA_OPTS
